@@ -12414,6 +12414,10 @@
   "@webMirrorCopiedLink": {
     "description": "Settings › Phones › Web mirror: the toast after a Copy button copies a link to the web mirror."
   },
+  "webMirrorCopyLanLink": "Copy the local network link",
+  "@webMirrorCopyLanLink": {
+    "description": "Settings › Phones › Web mirror: the accessibility label of the Copy button of the local network link (webMirrorLanLink)."
+  },
   "webMirrorCopyLink": "Copy the link",
   "@webMirrorCopyLink": {
     "description": "Settings › Phones › Web mirror: the accessibility label of the Copy button of the link on this computer."
@@ -12429,6 +12433,14 @@
   "webMirrorIntro": "Watch a phone's screen in a web browser, on this computer or on your other devices through Tailscale, and use the phone there if you allow it below.",
   "@webMirrorIntro": {
     "description": "Settings › Phones › Web mirror: under the heading webMirrorTitle, what the web mirror is. Tailscale is a product name: keep it."
+  },
+  "webMirrorLanLink": "On the local network",
+  "@webMirrorLanLink": {
+    "description": "Settings › Phones › Web mirror: the title of the row with the link for phones and computers on the same Wi-Fi or local network, which the web mirror serves over HTTPS with a CA the person gave it."
+  },
+  "webMirrorLanLinkDesc": "For devices on the same network that trust Pinky's certificate.",
+  "@webMirrorLanLinkDesc": {
+    "description": "Settings › Phones › Web mirror: under webMirrorLanLink."
   },
   "webMirrorLink": "On this computer",
   "@webMirrorLink": {

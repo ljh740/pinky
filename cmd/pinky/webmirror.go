@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -24,7 +25,7 @@ import (
 // It also serves the page that answers approvals in the browser
 // (internal/webapproval), off until Settings turns it on; that page
 // reaches the gateway's Needs and Decide, never the mirror's Source.
-func newWebMirror(g *gateway.Gateway, log *slog.Logger) *webMirror {
+func newWebMirror(g *gateway.Gateway, log *slog.Logger, lanCA *webmirror.CA) *webMirror {
 	approvals := webapproval.New(webapproval.Options{
 		Source:  g,
 		Log:     log,
@@ -40,7 +41,23 @@ func newWebMirror(g *gateway.Gateway, log *slog.Logger) *webMirror {
 		Owner:     tailnetOwner,
 		Text:      webMirrorText,
 		Approvals: approvals.Handler(),
+		LANCA:     lanCA,
 	}), Approvals: approvals}
+}
+
+// lanCAFile is the CA, in the config folder, that has the web mirror also
+// serve the local network over HTTPS (webmirror.LoadCA): a CERTIFICATE and
+// its PKCS#8 PRIVATE KEY in one PEM file, which the phones trust.
+const lanCAFile = "webmirror-lan-ca.pem"
+
+// loadLANCA reads lanCAFile from dir, nil when there is none or it is bad.
+func loadLANCA(dir string, log *slog.Logger) *webmirror.CA {
+	path := filepath.Join(dir, lanCAFile)
+	ca, err := webmirror.LoadCA(path)
+	if err != nil {
+		log.Warn("web mirror: cannot read the local network CA", "path", path, "err", err)
+	}
+	return ca
 }
 
 // tailnetOwner is the tailnet login of the person this computer is signed

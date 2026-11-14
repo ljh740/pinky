@@ -22,6 +22,7 @@ type fakeMirror struct{}
 
 func (fakeMirror) Token() string                 { return "VIEWTOKEN" }
 func (fakeMirror) ControlToken() string          { return "" }
+func (fakeMirror) LANURL() string                { return "" }
 func (fakeMirror) NewToken()                     {}
 func (fakeMirror) Watchers() []webmirror.Watcher { return nil }
 func (fakeMirror) Err() error                    { return nil }

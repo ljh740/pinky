@@ -22,6 +22,9 @@ import (
 type WebMirror interface {
 	Token() string
 	ControlToken() string
+	// LANURL is the page on the local network, without its token: "" while
+	// the mirror does not serve it there.
+	LANURL() string
 	// NewToken replaces both tokens, cutting off every browser.
 	NewToken()
 	// Watchers are the browsers that watch now.
@@ -149,6 +152,16 @@ func (a *app) webMirrorLinks(c *mg.Context, tn RemoteTailnet, token, localTitle,
 			}
 		})
 	})
+	if lan := a.opt.WebMirror.LANURL(); lan != "" {
+		settingRow(c, locales.WebMirrorLanLink(), locales.WebMirrorLanLinkDesc(), false, func() {
+			mg.Row(c).Gap(8).AlignItems(mg.Center).Children(func() {
+				mg.Text(c, lan+"#…").Font("monospace").FontSize(12.5)
+				if button(c.Key("copy-lan"), "", btnOpt{small: true, icon: icCopy, label: locales.WebMirrorCopyLanLink()}).Clicked() {
+					a.copy(c, lan+"#"+token, locales.WebMirrorCopiedLink())
+				}
+			})
+		})
+	}
 	if tn.URL == "" {
 		return
 	}

@@ -230,7 +230,7 @@ func startGateway(c gatewayConfig) (*runningGateway, error) {
 	// Pinky runs again, however it started (quitmark.go).
 	gatewayUp(dirs, c.Fake, log)
 	return &runningGateway{Dirs: dirs, DataDir: dataDir, Policy: pol, G: g, Remote: newRemoteAgents(m, tok, log), MCP: m,
-		Mirror: newWebMirror(g, log), ln: ln, srv: srv, log: log}, nil
+		Mirror: newWebMirror(g, log, loadLANCA(dirs.Config, log)), ln: ln, srv: srv, log: log}, nil
 }
 
 // Serve answers agents and clients on the socket until ctx ends.

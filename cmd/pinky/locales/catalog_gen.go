@@ -33851,6 +33851,22 @@ func (msgs Messages) WebMirrorCopiedLink() string {
 	return Catalog.Format(msgs.locale, "webMirrorCopiedLink", nil)
 }
 
+// WebMirrorCopyLanLink says "Copy the local network link"
+// in the language the app shows.
+//
+// Settings › Phones › Web mirror: the accessibility label of the Copy
+// button of the local network link (webMirrorLanLink).
+func WebMirrorCopyLanLink() string { return In(i18n.Locale()).WebMirrorCopyLanLink() }
+
+// WebMirrorCopyLanLink says "Copy the local network link"
+// in the language of msgs.
+//
+// Settings › Phones › Web mirror: the accessibility label of the Copy
+// button of the local network link (webMirrorLanLink).
+func (msgs Messages) WebMirrorCopyLanLink() string {
+	return Catalog.Format(msgs.locale, "webMirrorCopyLanLink", nil)
+}
+
 // WebMirrorCopyLink says "Copy the link"
 // in the language the app shows.
 //
@@ -33917,6 +33933,38 @@ func WebMirrorIntro() string { return In(i18n.Locale()).WebMirrorIntro() }
 // what the web mirror is. Tailscale is a product name: keep it.
 func (msgs Messages) WebMirrorIntro() string {
 	return Catalog.Format(msgs.locale, "webMirrorIntro", nil)
+}
+
+// WebMirrorLanLink says "On the local network"
+// in the language the app shows.
+//
+// Settings › Phones › Web mirror: the title of the row with the link
+// for phones and computers on the same Wi-Fi or local network, which the
+// web mirror serves over HTTPS with a CA the person gave it.
+func WebMirrorLanLink() string { return In(i18n.Locale()).WebMirrorLanLink() }
+
+// WebMirrorLanLink says "On the local network"
+// in the language of msgs.
+//
+// Settings › Phones › Web mirror: the title of the row with the link
+// for phones and computers on the same Wi-Fi or local network, which the
+// web mirror serves over HTTPS with a CA the person gave it.
+func (msgs Messages) WebMirrorLanLink() string {
+	return Catalog.Format(msgs.locale, "webMirrorLanLink", nil)
+}
+
+// WebMirrorLanLinkDesc says "For devices on the same network that trust Pinky's certificate."
+// in the language the app shows.
+//
+// Settings › Phones › Web mirror: under webMirrorLanLink.
+func WebMirrorLanLinkDesc() string { return In(i18n.Locale()).WebMirrorLanLinkDesc() }
+
+// WebMirrorLanLinkDesc says "For devices on the same network that trust Pinky's certificate."
+// in the language of msgs.
+//
+// Settings › Phones › Web mirror: under webMirrorLanLink.
+func (msgs Messages) WebMirrorLanLinkDesc() string {
+	return Catalog.Format(msgs.locale, "webMirrorLanLinkDesc", nil)
 }
 
 // WebMirrorLink says "On this computer"

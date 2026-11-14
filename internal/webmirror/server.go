@@ -28,6 +28,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/subtle"
+	"crypto/tls"
 	_ "embed"
 	"encoding/base64"
 	"encoding/json"
@@ -88,6 +89,11 @@ type Options struct {
 	// answers approvals in the browser (internal/webapproval), which does
 	// its own checks besides. The mirror itself never reaches approvals.
 	Approvals http.Handler
+	// LANCA, when set, has the mirror also listen at LANPort on every
+	// address over HTTPS, with certificates it signs, for phones on the
+	// local network that trust it. Such requests count as this
+	// computer's own (not proxied), so the control link works there.
+	LANCA *CA
 }
 
 // ApprovalsPath is where Options.Approvals is served.
@@ -101,6 +107,8 @@ type Server struct {
 	mu  sync.Mutex
 	ln  net.Listener
 	srv *http.Server
+	// lanSrv serves the LAN listener while there is one (Options.LANCA).
+	lanSrv *http.Server
 	// token can only watch; controlToken can also use the phone, and is
 	// "" while the person does not allow that. Both in memory only.
 	token        string
@@ -149,7 +157,48 @@ func (s *Server) Set(on bool) error {
 		}
 	}()
 	s.log.Info("web mirror on", "addr", Addr)
+	if s.opt.LANCA != nil {
+		s.listenLANLocked()
+	}
 	return nil
+}
+
+// listenLANLocked starts the LAN listener; when it cannot, the mirror
+// stays on this computer only, and LANURL is "".
+func (s *Server) listenLANLocked() {
+	ln, err := net.Listen("tcp", ":"+LANPort)
+	if err != nil {
+		s.log.Warn("web mirror: cannot listen on the local network", "port", LANPort, "err", err)
+		return
+	}
+	srv := &http.Server{
+		Handler:           lanHandler(s.Handler()),
+		ReadHeaderTimeout: 10 * time.Second,
+		TLSConfig:         &tls.Config{GetCertificate: s.opt.LANCA.certificate, MinVersion: tls.VersionTLS12},
+		// HTTP/1.1 only: the WebSocket takes over the connection, which
+		// HTTP/2 cannot give.
+		TLSNextProto: map[string]func(*http.Server, *tls.Conn, http.Handler){},
+	}
+	s.lanSrv = srv
+	go func() {
+		if err := srv.ServeTLS(ln, "", ""); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			s.log.Warn("web mirror: the local network listener stopped", "err", err)
+		}
+	}()
+	s.log.Info("web mirror on the local network", "port", LANPort)
+}
+
+// LANURL is the page's address on the local network, "" while the mirror
+// does not listen there or this computer has no LAN address.
+func (s *Server) LANURL() string {
+	s.mu.Lock()
+	on := s.lanSrv != nil
+	s.mu.Unlock()
+	ip := lanIP()
+	if !on || ip == nil {
+		return ""
+	}
+	return "https://" + net.JoinHostPort(ip.String(), LANPort) + "/"
 }
 
 // On reports whether the web mirror is on.
@@ -180,6 +229,10 @@ func (s *Server) stopLocked() {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	s.srv.Shutdown(ctx)
+	if s.lanSrv != nil {
+		s.lanSrv.Shutdown(ctx)
+		s.lanSrv = nil
+	}
 	s.stopped = true
 	s.closeConnsLocked(false)
 	s.ln, s.srv = nil, nil
@@ -324,6 +377,9 @@ func (s *Server) Handler() http.Handler {
 // requests under. A page whose DNS name was rebound to 127.0.0.1 names
 // another host, and is refused.
 func (s *Server) ownHost(r *http.Request) bool {
+	if fromLAN(r) {
+		return true // lanHandler checked the Host
+	}
 	name := r.Host
 	if h, _, err := net.SplitHostPort(name); err == nil {
 		name = h
@@ -348,7 +404,7 @@ func (s *Server) ownHost(r *http.Request) bool {
 // this computer's loopback, or carries a header a proxy adds. A request
 // with a Host of the client's choosing still shows the headers `tailscale
 // serve` adds (X-Forwarded-*, Tailscale-*).
-func proxied(r *http.Request) bool { return Proxied(r) }
+func proxied(r *http.Request) bool { return !fromLAN(r) && Proxied(r) }
 
 // Proxied reports whether r came through a proxy such as `tailscale
 // serve` (proxied). A process on this computer can fake it.

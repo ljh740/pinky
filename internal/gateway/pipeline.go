@@ -845,7 +845,7 @@ func (g *Gateway) prepare(ctx context.Context, l *lease, a Action, cur *screen.S
 	readOnly := l.readOnly
 	fgAllowed := allowsLocked(l, fg)
 	prov := d.provider // discovery sets it again under g.mu
-	virtual := d.info.Virtual
+	virtual := d.info.Virtual || d.info.VirtualMachine
 	g.mu.Unlock()
 	p.input = policy.Input{Device: d.id, App: fg, Screen: cur, TaskApps: apps, LongPress: a.LongPress,
 		ReadOnly: scope.Mode == ScopeReadOnly || readOnly, ReadOnlyAccess: scope.Mode == ScopeReadOnly,

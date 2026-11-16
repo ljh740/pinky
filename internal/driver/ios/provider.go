@@ -531,6 +531,7 @@ func (p *Provider) inspect(ctx context.Context, e goios.DeviceEntry) driver.Info
 	info.Name = values.Value.DeviceName
 	info.Model = modelName(values.Value.ProductType)
 	info.OSVersion = values.Value.ProductVersion
+	info.VirtualMachine = virtualMachine(values.Value)
 	if values.Value.PasswordProtected {
 		p.noteLocked(info.ID) // it has a passcode (wifi.go, dozing)
 		if info.Connection == "wifi" {
@@ -981,6 +982,14 @@ func twoScreens(model string) bool {
 		}
 	}
 	return false
+}
+
+// virtualMachine reports whether lockdown's values are of an iPhone in a
+// virtual machine: Apple's Virtual Research platform says "vresearch…"
+// for HardwarePlatform and "VM…" (vphone: "VM0001") for ModelNumber,
+// which no iPhone does.
+func virtualMachine(v goios.AllValuesType) bool {
+	return strings.HasPrefix(v.HardwarePlatform, "vresearch") || strings.HasPrefix(v.ModelNumber, "VM")
 }
 
 func modelName(productType string) string {

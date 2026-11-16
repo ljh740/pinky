@@ -254,3 +254,21 @@ func TestLinkClosesRSDOnce(t *testing.T) {
 		t.Fatalf("closed %d times, want once", c.n)
 	}
 }
+
+func TestVirtualMachine(t *testing.T) {
+	for _, c := range []struct {
+		platform, model string
+		want            bool
+	}{
+		{"vresearch101", "VM0001", true}, // vphone
+		{"vresearch101", "", true},
+		{"", "VM0001", true},
+		{"t8140", "MYE33", false}, // an iPhone
+		{"", "", false},
+	} {
+		v := goios.AllValuesType{HardwarePlatform: c.platform, ModelNumber: c.model}
+		if got := virtualMachine(v); got != c.want {
+			t.Errorf("virtualMachine(%q, %q) = %v, want %v", c.platform, c.model, got, c.want)
+		}
+	}
+}

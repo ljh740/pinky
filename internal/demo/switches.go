@@ -113,6 +113,14 @@ func (d *Device) SetVirtual(on bool) {
 	d.info.Virtual = on
 }
 
+// SetVirtualMachine makes the phone an iPhone in a virtual machine
+// (driver.Info.VirtualMachine).
+func (d *Device) SetVirtualMachine(on bool) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.info.VirtualMachine = on
+}
+
 // LaunchLocale implements driver.LocaleLauncher, as Android's per-app
 // languages do: the language stays the app's until the returned func puts
 // the old one back.

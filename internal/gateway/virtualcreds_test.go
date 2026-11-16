@@ -12,7 +12,8 @@ import (
 // TestVirtualCredentials: typing into a password field and tapping an
 // app's own passcode keypad are refused on a phone whatever the switch
 // says, and on a virtual phone until the person turns on
-// VirtualCredentials (Settings › Safety).
+// VirtualCredentials (Settings › Safety). An iPhone in a virtual machine
+// counts as a virtual phone there.
 func TestVirtualCredentials(t *testing.T) {
 	g, dev := newTestGateway(t)
 	labels := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "FaceID", "0", "Delete"}
@@ -87,5 +88,17 @@ func TestVirtualCredentials(t *testing.T) {
 	}
 	if res := typeUnfocused(); refused(res) {
 		t.Fatalf("typing without ref on a virtual phone, switch on: %+v", res)
+	}
+
+	// An iPhone in a virtual machine (vphone), switch on: goes through.
+	dev.SetVirtual(false)
+	dev.SetVirtualMachine(true)
+	for deadline := time.Now().Add(3 * time.Second); g.Devices()[0].Info.Virtual || !g.Devices()[0].Info.VirtualMachine; time.Sleep(10 * time.Millisecond) {
+		if time.Now().After(deadline) {
+			t.Fatal("the phone did not become an iPhone in a virtual machine")
+		}
+	}
+	if res := typePassword(); refused(res) || res.Status == StatusBlocked {
+		t.Fatalf("a virtual machine's password field, switch on: %+v", res)
 	}
 }

@@ -77,6 +77,12 @@ type Info struct {
 	// VirtualID is the VirtualPhone.ID a virtual phone runs as, to start
 	// it again from its page while it is offline; "" when not known.
 	VirtualID string `json:",omitempty"`
+	// VirtualMachine marks an iPhone that runs in a virtual machine (Apple's
+	// Virtual Research platform, as vphone runs it) and is driven as an
+	// iPhone: unlike Virtual it needs its helper and the steps of a phone,
+	// and only the policy counts it as a virtual phone, for Settings ›
+	// Safety › Allow passwords on virtual phones.
+	VirtualMachine bool `json:",omitempty"`
 }
 
 // WiFiConnection is what an iPhone's provider knows of its Wi-Fi connection:

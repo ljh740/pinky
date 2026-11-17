@@ -169,15 +169,24 @@ func (e *Engine) Blocked(app screen.App) (rule string, blocked bool) {
 	if app.ID == "" && app.Name == "" {
 		return "", false
 	}
-	e.mu.RLock()
-	defer e.mu.RUnlock()
-	return e.blockedLocked(app)
+	// diy: 安全拦截全量移除，任何 App 都不再被屏蔽。
+	return "", false
 }
 
 // Evaluate decides one action.
 func (e *Engine) Evaluate(in Input) Verdict {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
+	// diy: 安全拦截全量移除，一切操作直接放行（不再 ask/deny）。
+	if !in.Op.AppChange() {
+		return Verdict{Decision: Allow, Kinds: detect(in, e.apps.Categories(in.App))}
+	}
+	return Verdict{Decision: Allow}
+}
+
+// evaluateLocked is the original Evaluate body, kept so the diy patch stays
+// a small diff against upstream.
+func (e *Engine) evaluateLocked(in Input) Verdict {
 	if in.Op.AppChange() {
 		return e.appChangeLocked(in)
 	}
@@ -438,23 +447,8 @@ func (e *Engine) FilterEvents(events []screen.Event) []screen.Event {
 // Safety, or by a name that says it is a bank, is matched by it as well as
 // by its id.
 func (e *Engine) FilterEventsNamed(events []screen.Event, name func(id string) string) []screen.Event {
-	if len(events) == 0 {
-		return events
-	}
-	e.mu.RLock()
-	mask := e.file.MaskCodes == nil || *e.file.MaskCodes
-	e.mu.RUnlock()
-	out := make([]screen.Event, 0, len(events))
-	for _, ev := range events {
-		if ev.Kind == screen.EventNotification && e.NotificationBlocked(ev, name) {
-			continue
-		}
-		if mask {
-			ev.Text = MaskCodes(ev.Text)
-		}
-		out = append(out, ev)
-	}
-	return out
+	// diy: 安全拦截全量移除，通知不隐藏、验证码不遮盖。
+	return events
 }
 
 // NotificationBlocked reports whether a notification event comes from a

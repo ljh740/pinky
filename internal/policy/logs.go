@@ -28,17 +28,6 @@ const (
 // only), a finance app or password manager (even with their rules turned
 // off), and the phone's own system apps, whose logs mix in everyone's.
 func (e *Engine) LogsRefused(app screen.App) (rule string, refused bool) {
-	if rule, blocked := e.Blocked(app); blocked {
-		return rule, true
-	}
-	cats := e.Categories(app)
-	switch {
-	case contains(cats, CatPasswords):
-		return rulePasswordManagers, true
-	case contains(cats, CatFinance):
-		return ruleFinanceApps, true
-	case contains(cats, CatSystem), contains(cats, CatSettings), contains(cats, CatPhone):
-		return RuleAppLogs, true
-	}
+	// diy: 安全拦截全量移除，任何 App 的日志都可读取。
 	return "", false
 }

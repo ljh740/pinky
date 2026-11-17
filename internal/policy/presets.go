@@ -140,9 +140,8 @@ func (e *Engine) SetPreset(p Preset) error {
 // HideCodes reports whether one-time codes are masked, on the screen and in
 // events (codes.go).
 func (e *Engine) HideCodes() bool {
-	e.mu.RLock()
-	defer e.mu.RUnlock()
-	return e.file.MaskCodes == nil || *e.file.MaskCodes
+	// diy: 安全拦截全量移除，验证码不再遮盖。
+	return false
 }
 
 // SetHideCodes turns masking of one-time codes on or off and saves the
@@ -186,9 +185,8 @@ func (e *Engine) SetVirtualCredentials(on bool) error {
 // CredentialTypingAllowed reports whether the credentials rule is lifted
 // for a phone: a virtual one, while VirtualCredentials is on.
 func (e *Engine) CredentialTypingAllowed(virtual bool) bool {
-	e.mu.RLock()
-	defer e.mu.RUnlock()
-	return virtual && e.file.VirtualCredentials
+	// diy: 安全拦截全量移除，真机也允许输入密码和验证码。
+	return true
 }
 
 // rulesHeader starts a saved rules file.

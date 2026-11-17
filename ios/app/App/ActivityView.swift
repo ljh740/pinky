@@ -9,6 +9,7 @@ struct ActivityView: View {
     @State private var loading = false
     @State private var failed = false
     @State private var loaded = false
+    @State private var deleteFailed = false
 
     var body: some View {
         List {
@@ -16,6 +17,9 @@ struct ActivityView: View {
                 Section(d.day) {
                     ForEach(d.tasks) { t in
                         NavigationLink { PastTaskView(task: t) } label: { PastTaskRow(task: t, showDay: false) }
+                            .swipeActions {
+                                Button("Delete", role: .destructive) { Task { await delete(t) } }
+                            }
                     }
                 }
             }
@@ -42,6 +46,16 @@ struct ActivityView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { if !loaded { await load(after: nil) } }
         .refreshable { await load(after: nil) }
+        .alert(String(localized: "Couldn't delete this task.", comment: "Activity: deleting a task failed"), isPresented: $deleteFailed) {}
+    }
+
+    /// Deletes a task from Activity, with its steps and screenshots.
+    private func delete(_ t: PastTask) async {
+        guard await m.deletePastTask(t.id) else {
+            deleteFailed = true
+            return
+        }
+        tasks.removeAll { $0.id == t.id }
     }
 
     /// The tasks by the day they started, in order.
@@ -144,6 +158,7 @@ struct PastTaskView: View {
                 Section { ProgressView().frame(maxWidth: .infinity) }
             }
         }
+        .textSelection(.enabled)
         .navigationTitle("Activity")
         .navigationBarTitleDisplayMode(.inline)
         .task {

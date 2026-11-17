@@ -600,6 +600,12 @@ final class AppModel: ObservableObject {
         return r.code == "gone" ? .gone : .failed
     }
 
+    /// Deletes a task that ended from Activity; false when the core could
+    /// not (the task still runs, or the history could not be written).
+    func deletePastTask(_ id: String) async -> Bool {
+        await call(["cmd": "history_delete", "id": id]).ok
+    }
+
     // MARK: Live Activity
 
     private func startActivity(_ text: String) {

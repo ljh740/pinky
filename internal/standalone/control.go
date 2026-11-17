@@ -32,6 +32,7 @@ import (
 //	{"cmd":"history","before":<ms>,"limit":20}          → {"ok":true,"history":[...],"more":true}
 //	                                                      (History: PastTask, newest first; both fields optional)
 //	{"cmd":"history","id":"..."}                        → {"ok":true,"history":[the task, with its steps]}
+//	{"cmd":"history_delete","id":"..."}                 → {"ok":true}  (DeleteTask; "running" while it runs)
 //	{"cmd":"check","service":"...","key":"...",...}     → {"ok":true,"check":{...}}  (StartRequest; pilot.CheckResult)
 //	{"cmd":"usage","since":"2006-01-02"}                → {"ok":true,"usage":[...]}  (pilot.UsageRow, newest first)
 //	{"cmd":"steer","text":"..."}                        → {"ok":true,"id":"m1"}  (Steer: to the running task)
@@ -139,6 +140,7 @@ const (
 	CodeBusy     = "busy"      // a task already runs
 	CodeComputer = "computer"  // ErrComputer: Pinky on a computer uses the phone
 	CodeGone     = "gone"      // ErrGone: the task is no longer in the history
+	CodeRunning  = "running"   // gateway.ErrTaskRunning: history_delete of a task that runs
 	// The person's messages to the agent (steer, withdraw, continue).
 	CodeEmpty          = "empty"           // no message
 	CodeNotRunning     = "not_running"     // no task runs to send it to
@@ -173,6 +175,8 @@ func codeOf(err error) string {
 		return CodeShared
 	case errors.Is(err, ErrGone):
 		return CodeGone
+	case errors.Is(err, gateway.ErrTaskRunning):
+		return CodeRunning
 	case errors.Is(err, pilot.ErrEmpty):
 		return CodeEmpty
 	case errors.Is(err, pilot.ErrNotRunning):
@@ -275,6 +279,10 @@ func (c *Core) handle(r request) reply {
 		c.Dismiss()
 	case "history":
 		return c.history(r)
+	case "history_delete":
+		ctx, cancel := context.WithTimeout(c.ctx, historyWait)
+		defer cancel()
+		err = c.DeleteTask(ctx, r.ID)
 	case "steer":
 		if r.ID != "" {
 			err = c.EditMessage(r.ID, r.Text)

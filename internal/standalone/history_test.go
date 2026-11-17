@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -243,5 +244,60 @@ func TestKeepRuns(t *testing.T) {
 	if len(runs) != 4 || runs[0].Task != strconv.Itoa(maxRuns) || runs[1].Task != strconv.Itoa(maxRuns+1) ||
 		runs[2].Task != "5" || runs[3].Task != "new" {
 		t.Fatalf("after the cutoff: %+v", runs)
+	}
+}
+
+// Delete in Activity takes a task that ended out of the history and the
+// core's records; one that runs stays.
+func TestHistoryDelete(t *testing.T) {
+	dir := t.TempDir()
+	h := newHarness(t, func(o *Options) { o.DataDir = dir })
+	ctl, sub := h.dial(t), h.dial(t)
+	sub.send(map[string]any{"cmd": "subscribe"})
+	sub.read()
+	asked := make(chan struct{})
+	var once sync.Once
+	h.api.mu.Lock()
+	h.api.n, h.api.turns = 0, []func(string, *http.Request) map[string]any{func(_ string, r *http.Request) map[string]any {
+		once.Do(func() { close(asked) })
+		<-r.Context().Done()
+		return nil
+	}}
+	h.api.mu.Unlock()
+	if r := ctl.do(map[string]any{"cmd": "start", "task": "Wait", "key": "sk-test", "base_url": h.url, "model": "fake"}); !r.OK {
+		t.Fatalf("start: %+v", r)
+	}
+	<-asked
+	st := sub.until("the task", func(s State) bool { return s.Task != nil && s.Task.ID != "" })
+	id := st.Task.ID
+	if r := ctl.do(map[string]any{"cmd": "history_delete", "id": id}); r.OK || r.Code != CodeRunning {
+		t.Fatalf("delete while it runs: %+v", r)
+	}
+	if r := ctl.do(map[string]any{"cmd": "stop"}); !r.OK {
+		t.Fatalf("stop: %+v", r)
+	}
+	sub.until("the end", func(s State) bool { return s.Agent != nil && !s.Agent.Running })
+	eventually(t, "the task is recorded", func() bool {
+		r := ctl.do(map[string]any{"cmd": "history"})
+		return len(r.History) == 1 && r.History[0].Agent != nil
+	})
+
+	for range 2 { // a second delete finds nothing, which is no error
+		if r := ctl.do(map[string]any{"cmd": "history_delete", "id": id}); !r.OK {
+			t.Fatalf("delete: %+v", r)
+		}
+	}
+	if r := ctl.do(map[string]any{"cmd": "history"}); !r.OK || len(r.History) != 0 {
+		t.Fatalf("history after delete: %+v", r)
+	}
+	if r := ctl.do(map[string]any{"cmd": "history", "id": id}); r.OK || r.Code != CodeGone {
+		t.Fatalf("the deleted task: %+v", r)
+	}
+	if _, ok := h.core.runIndex()[id]; ok {
+		t.Fatal("the core still keeps the deleted task's record")
+	}
+	b, err := os.ReadFile(filepath.Join(dir, "runs.json"))
+	if err != nil || strings.Contains(string(b), id) {
+		t.Fatalf("runs.json: %s, %v", b, err)
 	}
 }

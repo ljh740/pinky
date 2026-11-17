@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/DIYgod/pinky/internal/gateway"
@@ -261,6 +262,27 @@ func keepRuns(runs []runRecord, r runRecord, cutoff int64) []runRecord {
 		out = out[n-maxRuns:]
 	}
 	return out
+}
+
+// DeleteTask deletes a task that ended from the history, with its steps,
+// screenshots and the core's record of it, as the person asks in Activity.
+// A task the history no longer has is no error; one that still runs is
+// gateway.ErrTaskRunning, and nothing is deleted.
+func (c *Core) DeleteTask(ctx context.Context, id string) error {
+	if err := c.G.DeleteTasks(ctx, []string{id}); err != nil {
+		return err
+	}
+	c.runMu.Lock()
+	defer c.runMu.Unlock()
+	i := slices.IndexFunc(c.runs, func(r runRecord) bool { return r.Task == id })
+	if i < 0 {
+		return nil
+	}
+	c.runs = slices.Delete(c.runs, i, i+1)
+	if c.opt.DataDir == "" {
+		return nil
+	}
+	return writeJSON(c.runsPath(), c.runs)
 }
 
 // runIndex is the records by task.

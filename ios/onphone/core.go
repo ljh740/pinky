@@ -293,6 +293,12 @@ func (c *Core) handle(r request) reply {
 		return reply{OK: true}
 	case "history":
 		return c.history(ctx, r)
+	case "history_delete":
+		ctx, cancel := context.WithTimeout(ctx, historyWait)
+		defer cancel()
+		if err := c.sc.DeleteTask(ctx, r.ID); err != nil {
+			return fail(standalone.Code(err), err)
+		}
 	case "info":
 		return reply{OK: true, Info: c.info()}
 	case "steer":

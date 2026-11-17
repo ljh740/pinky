@@ -834,6 +834,23 @@
         }
       }
     },
+    "Couldn't delete this task." : {
+      "comment" : "Activity: deleting a task failed",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このタスクを削除できませんでした。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法删除这个任务。"
+          }
+        }
+      }
+    },
     "Couldn't finish" : {
       "comment" : "A task ended: failed or declined",
       "localizations" : {

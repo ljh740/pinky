@@ -266,6 +266,9 @@ func New(o Options) (*Gateway, error) {
 		Timeout:  o.ApprovalTimeout,
 		OnChange: func() { g.emit(Event{Kind: EventNeeds}); g.emit(Event{Kind: EventDevices}) },
 		OnExpire: g.approvalExpired,
+		// diy: a handoff waits for the person to finish, so it is never
+		// answered for them.
+		AutoAllow: func(r approval.Request) bool { return r.Kind != approval.KindHandoff && g.policy.AutoAllow() },
 	})
 	g.rec = newRecorder(g.log)
 	g.initCapture()

@@ -347,6 +347,7 @@ func gatewaySettings(s *ui.Settings, rg *runningGateway) {
 	}
 	s.HideCodes = rg.Policy.HideCodes()
 	s.VirtualCredentials = rg.Policy.VirtualCredentials()
+	s.AutoAllow = rg.Policy.AutoAllow()
 	s.ReadOnly = rg.Policy.ReadOnly("")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -512,6 +513,9 @@ func applySettings(rg *runningGateway, old, s ui.Settings, log *slog.Logger) {
 	}
 	if s.VirtualCredentials != old.VirtualCredentials {
 		warn("virtual credentials", rg.Policy.SetVirtualCredentials(s.VirtualCredentials))
+	}
+	if s.AutoAllow != old.AutoAllow {
+		warn("auto allow", rg.Policy.SetAutoAllow(s.AutoAllow))
 	}
 	if s.ReadOnly != old.ReadOnly {
 		warn("read-only", rg.G.SetReadOnly("", s.ReadOnly))

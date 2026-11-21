@@ -1706,6 +1706,8 @@
   "settingsSafetyHideCodesDesc": "屏幕上和通知里的一次性验证码会在智能体读到之前被打码，截图里也会被遮住。录屏里的验证码不遮，所以只有你允许，智能体才拿得到录屏。",
   "settingsSafetyVirtualCredentials": "允许在虚拟手机上输入密码",
   "settingsSafetyVirtualCredentialsDesc": "智能体可以在这台电脑上的模拟器里输入密码和一次性验证码，方便用测试账号测试登录。在真机上始终不行。",
+  "settingsSafetyAutoAllow": "自动允许所有请求",
+  "settingsSafetyAutoAllowDesc": "智能体的每个审批请求（操作、新智能体连接、读取日志、复制文件、录屏和流量）都会立即被允许一次，不再询问你。交接仍然等你。",
   "settingsSafetyIntro": "Pinky 会在每个操作到达手机前进行检查。智能体无法更改这些设置。",
   "settingsSafetyKindBanking": "银行",
   "settingsSafetyKindBrowsers": "浏览器",

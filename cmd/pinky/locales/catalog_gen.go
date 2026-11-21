@@ -28183,6 +28183,38 @@ func (msgs Messages) SettingsSafetyVirtualCredentialsDesc() string {
 	return Catalog.Format(msgs.locale, "settingsSafetyVirtualCredentialsDesc", nil)
 }
 
+// SettingsSafetyAutoAllow says "Allow every request automatically"
+// in the language the app shows.
+//
+// Settings › Safety: the switch that answers every approval with Allow
+// once without asking the person. Off by default.
+func SettingsSafetyAutoAllow() string { return In(i18n.Locale()).SettingsSafetyAutoAllow() }
+
+// SettingsSafetyAutoAllow says "Allow every request automatically"
+// in the language of msgs.
+//
+// Settings › Safety: the switch that answers every approval with Allow
+// once without asking the person. Off by default.
+func (msgs Messages) SettingsSafetyAutoAllow() string {
+	return Catalog.Format(msgs.locale, "settingsSafetyAutoAllow", nil)
+}
+
+// SettingsSafetyAutoAllowDesc says "Every approval an agent asks for (actions, new agents, logs, files, recordings and traffic) is allowed once at once, …"
+// in the language the app shows.
+//
+// Settings › Safety: the line under Allow every request automatically.
+// Handoffs are when an agent hands the phone to the person.
+func SettingsSafetyAutoAllowDesc() string { return In(i18n.Locale()).SettingsSafetyAutoAllowDesc() }
+
+// SettingsSafetyAutoAllowDesc says "Every approval an agent asks for (actions, new agents, logs, files, recordings and traffic) is allowed once at once, …"
+// in the language of msgs.
+//
+// Settings › Safety: the line under Allow every request automatically.
+// Handoffs are when an agent hands the phone to the person.
+func (msgs Messages) SettingsSafetyAutoAllowDesc() string {
+	return Catalog.Format(msgs.locale, "settingsSafetyAutoAllowDesc", nil)
+}
+
 // SettingsSafetyIntro says "Pinky checks every action before it reaches the phone. Agents can't change these settings."
 // in the language the app shows.
 //

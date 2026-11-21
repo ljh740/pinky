@@ -26,8 +26,12 @@ type File struct {
 	// fields, and tap an app's own passcode keypad, on virtual phones (an
 	// emulator or a Simulator on this computer), for signing in with test
 	// accounts. Phones are refused as ever. Default false.
-	VirtualCredentials bool   `yaml:"virtual_credentials,omitempty"`
-	Rules              []Rule `yaml:"rules"`
+	VirtualCredentials bool `yaml:"virtual_credentials,omitempty"`
+	// AutoAllow answers every approval (an action, a new agent, a log,
+	// file, recording or traffic request) with Allow once at once, without
+	// asking the person; handoffs still wait. Default false (diy).
+	AutoAllow bool   `yaml:"auto_allow,omitempty"`
+	Rules     []Rule `yaml:"rules"`
 	// AlwaysAllow holds the person's "Always allow" answers to approvals
 	// (see Exemption), oldest first.
 	AlwaysAllow []Exemption `yaml:"always_allow,omitempty"`

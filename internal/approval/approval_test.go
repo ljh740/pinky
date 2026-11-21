@@ -119,7 +119,7 @@ func TestBindingAndWithdraw(t *testing.T) {
 	if err != nil || out.State != Withdrawn || out.Reason != "stopped" {
 		t.Fatalf("withdraw: %+v %v", out, err)
 	}
-	if len(c.List(true)) != 0 {
+	if len(c.List(false)) != 0 {
 		t.Fatal("withdrawn approval still listed")
 	}
 }
@@ -149,7 +149,7 @@ func TestOpenAfterClose(t *testing.T) {
 	c := New(Options{Timeout: time.Second})
 	c.Close()
 	a := c.Open(Request{Kind: KindAction, Binding: bind})
-	if len(c.List(true)) != 0 {
+	if len(c.List(false)) != 0 {
 		t.Fatal("approval opened after Close")
 	}
 	if _, err := c.Wait(context.Background(), a.ID, time.Second); !errors.Is(err, ErrUsed) {
@@ -173,5 +173,21 @@ func TestWaitDecidedAsTimeRunsOut(t *testing.T) {
 		if err != nil || out.State != Used {
 			t.Fatalf("try %d: %+v, %v", i, out, err)
 		}
+	}
+}
+
+func TestAutoAllow(t *testing.T) {
+	c := New(Options{Timeout: time.Second, AutoAllow: func(r Request) bool { return r.Kind != KindHandoff }})
+	a := c.Open(Request{Kind: KindAgent, Binding: bind})
+	if a.State != Decided || a.Decision != AllowOnce || len(c.List(false)) != 0 {
+		t.Fatalf("auto: %+v", a)
+	}
+	out, err := c.Wait(context.Background(), a.ID, 0)
+	if err != nil || out.State != Used || out.Decision != AllowOnce {
+		t.Fatalf("wait: %+v %v", out, err)
+	}
+	h := c.Open(Request{Kind: KindHandoff, Binding: bind})
+	if h.State != Open {
+		t.Fatalf("handoff answered: %+v", h)
 	}
 }

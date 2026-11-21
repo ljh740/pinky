@@ -182,6 +182,29 @@ func (e *Engine) SetVirtualCredentials(on bool) error {
 	return e.saveRulesLocked()
 }
 
+// AutoAllow reports whether approvals are answered without the person
+// (File.AutoAllow).
+func (e *Engine) AutoAllow() bool {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	return e.file.AutoAllow
+}
+
+// SetAutoAllow turns the automatic answering of approvals on or off, and
+// saves the rules file.
+func (e *Engine) SetAutoAllow(on bool) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if err := e.syncLocked(&e.rulesDisk); err != nil {
+		return err
+	}
+	if e.file.AutoAllow == on {
+		return nil
+	}
+	e.file.AutoAllow = on
+	return e.saveRulesLocked()
+}
+
 // CredentialTypingAllowed reports whether the credentials rule is lifted
 // for a phone: a virtual one, while VirtualCredentials is on.
 func (e *Engine) CredentialTypingAllowed(virtual bool) bool {

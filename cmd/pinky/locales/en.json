@@ -10366,6 +10366,14 @@
   "@settingsSafetyVirtualCredentialsDesc": {
     "description": "Settings › Safety: the line under Allow passwords on virtual phones. Phones means real phones, as opposed to virtual ones."
   },
+  "settingsSafetyAutoAllow": "Allow every request automatically",
+  "@settingsSafetyAutoAllow": {
+    "description": "Settings › Safety: the switch that answers every approval with Allow once without asking the person. Off by default."
+  },
+  "settingsSafetyAutoAllowDesc": "Every approval an agent asks for (actions, new agents, logs, files, recordings and traffic) is allowed once at once, without asking you. Handoffs still wait for you.",
+  "@settingsSafetyAutoAllowDesc": {
+    "description": "Settings › Safety: the line under Allow every request automatically. Handoffs are when an agent hands the phone to the person."
+  },
   "settingsSafetyIntro": "Pinky checks every action before it reaches the phone. Agents can't change these settings.",
   "@settingsSafetyIntro": {
     "description": "Settings › Safety: the line under the page title."

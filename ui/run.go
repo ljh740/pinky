@@ -180,8 +180,11 @@ type Settings struct {
 	// VirtualCredentials lets agents type passwords and one-time codes on
 	// virtual phones (policy.File.VirtualCredentials).
 	VirtualCredentials bool
-	KeepDays           int
-	Record             bool
+	// AutoAllow answers every approval without the person
+	// (policy.File.AutoAllow).
+	AutoAllow bool
+	KeepDays  int
+	Record    bool
 	// SmallerRecordings makes each task's recording smaller when the task
 	// ends (internal/recording.Smaller); off keeps the phone's own stream.
 	SmallerRecordings bool

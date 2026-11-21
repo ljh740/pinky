@@ -159,6 +159,9 @@ type Options struct {
 	// OnExpire runs, without locks held, when a decision expires because no
 	// call picked it up.
 	OnExpire func(Info)
+	// AutoAllow, when it returns true for a request, has Open answer it with
+	// AllowOnce at once, as if the person had (diy: the auto-allow switch).
+	AutoAllow func(Request) bool
 }
 
 // Center holds approvals.
@@ -217,6 +220,7 @@ func (c *Center) Open(r Request) Info {
 	}
 	e := &entry{Info: Info{ID: newID(), Request: r, Created: now, Deadline: now.Add(timeout), State: Open},
 		done: make(chan struct{})}
+	auto := c.opt.AutoAllow != nil && c.opt.AutoAllow(r)
 	c.mu.Lock()
 	if c.closed {
 		// The gateway is stopping: the approval is withdrawn at once.
@@ -228,8 +232,14 @@ func (c *Center) Open(r Request) Info {
 		return info
 	}
 	c.all[e.ID] = e
-	id := e.ID
-	e.timer = time.AfterFunc(timeout, func() { c.expire(id) })
+	if auto {
+		e.State, e.Decision, e.Note, e.DecidedAt = Decided, AllowOnce, "Allowed automatically.", now
+		close(e.done)
+		c.keepLocked(e)
+	} else {
+		id := e.ID
+		e.timer = time.AfterFunc(timeout, func() { c.expire(id) })
+	}
 	info := e.Info
 	c.mu.Unlock()
 	c.changed()

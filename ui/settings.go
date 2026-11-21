@@ -313,7 +313,8 @@ func (a *app) settingsSafety(c *mg.Context) {
 		}
 		a.offWhile(c, rulesYAML).Children(func() {
 			a.toggleRow(c, "codes", locales.SettingsSafetyHideCodes(), locales.SettingsSafetyHideCodesDesc(), false, &st.HideCodes)
-			a.toggleRow(c, "virtual-credentials", locales.SettingsSafetyVirtualCredentials(), locales.SettingsSafetyVirtualCredentialsDesc(), true, &st.VirtualCredentials)
+			a.toggleRow(c, "virtual-credentials", locales.SettingsSafetyVirtualCredentials(), locales.SettingsSafetyVirtualCredentialsDesc(), false, &st.VirtualCredentials)
+			a.toggleRow(c, "auto-allow", locales.SettingsSafetyAutoAllow(), locales.SettingsSafetyAutoAllowDesc(), true, &st.AutoAllow)
 		})
 	})
 	a.rulesSection(c)

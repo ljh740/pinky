@@ -1706,6 +1706,8 @@
   "settingsSafetyHideCodesDesc": "画面上と通知内のワンタイムコードは、エージェントが読む前に伏せ字にし、スクリーンショットでも隠します。録画ではそのまま見えるため、エージェントに渡すのはあなたが許可したときだけです。",
   "settingsSafetyVirtualCredentials": "仮想スマホでのパスワード入力を許可",
   "settingsSafetyVirtualCredentialsDesc": "このパソコン上のエミュレーターとシミュレーターでは、テスト用アカウントでのログインを試せるよう、エージェントがパスワードとワンタイムコードを入力できます。実機のスマホでは入力できません。",
+  "settingsSafetyAutoAllow": "すべてのリクエストを自動で許可",
+  "settingsSafetyAutoAllowDesc": "エージェントからの承認リクエスト（操作、新しいエージェントの接続、ログの読み取り、ファイルのコピー、録画、通信）は、確認せずにすぐ1回許可されます。引き継ぎは引き続きあなたを待ちます。",
   "settingsSafetyIntro": "Pinky は操作がスマホに届く前に確認を行います。エージェントはこれらの設定を変更できません。",
   "settingsSafetyKindBanking": "銀行",
   "settingsSafetyKindBrowsers": "ブラウザ",
